@@ -16,12 +16,14 @@ export type NbaProviderErrorCode =
   | "INVALID_RESPONSE";
 
 export class NbaProviderError extends Error {
-  constructor(
-    public readonly code: NbaProviderErrorCode,
-    public readonly retryAfterSeconds?: number,
-  ) {
+  readonly code: NbaProviderErrorCode;
+  readonly retryAfterSeconds: number | undefined;
+
+  constructor(code: NbaProviderErrorCode, retryAfterSeconds?: number) {
     super(code);
     this.name = "NbaProviderError";
+    this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
