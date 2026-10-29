@@ -1,5 +1,7 @@
 # Live-score refresh and caching (Group 4)
 
+The default provider is the no-subscription [swar/nba_api Python bridge](nba-python.md). The same refresh policy applies to it, subject to NBA.com endpoint availability and throttling. Alternative paid integrations are strictly opt-in.
+
 ## Client behavior
 
 `useGames(date)` requests `/api/games?date=YYYY-MM-DD` on page entry and schedules another fetch using `refreshAfterSeconds` from the server response. Automatic updating pauses when the document is hidden or the browser is offline. Returning to a visible/online state triggers a new fetch.
@@ -25,15 +27,15 @@ Responses use `Cache-Control: public, max-age=0, s-maxage=N, stale-while-revalid
 
 ## Quota controls and limitations
 
-A `NbaQuotaGuard` reserves one token **before each individual upstream request**, including extra cursor pages, with a default limit of **4 requests per rolling 60-second window per Node.js runtime**. The fifth request is rejected locally, without contacting BALLDONTLIE. An upstream 429 triggers a shared per-runtime cooldown. Per-date in-flight calls are coalesced. Old slate entries are bounded to 64 dates.
+A `NbaQuotaGuard` reserves one token **before each individual upstream request**, including extra cursor pages, with a default limit of **4 requests per rolling 60-second window per Node.js runtime**. The fifth request is rejected locally, without contacting the selected upstream or Python bridge. An upstream 429 triggers a shared per-runtime cooldown. Per-date in-flight calls are coalesced. Old slate entries are bounded to 64 dates.
 
-**This is not an account-wide hard limit in serverless deployments.** Separate regions, runtime replicas, and cold starts have separate in-memory queues and caches. CDN caching is segmented by region and may be evicted. A public production deployment with meaningful concurrent traffic requires a central distributed rate budget/cache, or an upgraded API tier, with measurements confirming actual upstream call volume. This is a deliberate limitation of the no-database/no-Redis MVP.
+**This is not an account-wide hard limit in serverless deployments.** Separate regions, runtime replicas, and cold starts have separate in-memory queues and caches. CDN caching is segmented by region and may be evicted. A public production deployment with meaningful concurrent traffic requires a central distributed rate budget/cache, or suitable host/network capacity and a verified access policy, with measurements confirming actual upstream call volume. This is a deliberate limitation of the no-database/no-Redis MVP.
 
-Vercel CDN cache headers reduce origin calls on cache hits, but the response can remain stale during `stale-while-revalidate`. Do not promise sub-30-second end-to-end latency. Never use query cache-busting to force upstream refresh. The API key always remains server-only.
+Vercel CDN cache headers reduce origin calls on cache hits, but the response can remain stale during `stale-while-revalidate`. Do not promise sub-30-second end-to-end latency. Never use query cache-busting to force upstream refresh. Any API keys and the Python bridge token always remain server-only.
 
 ## Monitoring and tests
 
-Run `npm test` for fake-clock tests covering intervals, coalescing, pagination-token consumption, cooldowns, stale recovery and terminal authentication failures. CI does not make live BALLDONTLIE calls. Validate real-world score accuracy and provider redistribution permissions before public release.
+Run `npm test` for fake-clock tests covering intervals, coalescing, pagination-token consumption, cooldowns, stale recovery and terminal authentication failures. CI does not make live NBA.com or commercial-provider requests. Validate real-world score accuracy and provider redistribution permissions before public release.
 
 ## Optional API-NBA adapter
 

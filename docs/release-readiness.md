@@ -53,3 +53,7 @@ No new production libraries or database are added by Group 6; Playwright and axe
 ## Release decision
 
 Passing CI establishes **technical test readiness**, not automatic production authorization. Do not tag the project as production-ready until all manual gates are completed.
+
+## Free-default provider
+
+The default provider is now `swar/nba_api` through the private Python bridge. No paid API subscription is required. NBA.com can block hosted requests, and NBA.com data licensing must be confirmed before unrestricted public display. CI checks the local bridge with offline static NBA team data but does not prove live historical NBA.com access.

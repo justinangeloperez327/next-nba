@@ -9,6 +9,7 @@ export type ProviderConfig = {
 };
 
 export function readProviderConfig(env: Record<string, string | undefined> = process.env): ProviderConfig {
+  // Use the no-subscription, self-hosted swar/nba_api bridge unless explicitly overridden.
   const raw = env.NBA_DATA_PROVIDER?.trim();
   if (raw && raw !== "balldontlie" && raw !== "api-nba" && raw !== "nba-api") {
     throw new Error("NBA_DATA_PROVIDER must be balldontlie, api-nba or nba-api");
@@ -17,7 +18,7 @@ export function readProviderConfig(env: Record<string, string | undefined> = pro
   if (env.API_NBA_PLAN && !["free", "pro"].includes(env.API_NBA_PLAN)) {
     throw new Error("API_NBA_PLAN must be free or pro");
   }
-  return { source: raw === "api-nba" ? "api-nba" : raw === "nba-api" ? "nba-api" : "balldontlie", plan };
+  return { source: raw === "api-nba" ? "api-nba" : raw === "balldontlie" ? "balldontlie" : "nba-api", plan };
 }
 
 export type FactoryOptions = {

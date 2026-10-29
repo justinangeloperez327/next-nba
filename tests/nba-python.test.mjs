@@ -20,7 +20,9 @@ function makeProvider(fetcher, extra = {}) {
 }
 
 test("third provider is opt-in and existing providers remain default", () => {
-  assert.equal(readProviderConfig({}).source, "balldontlie");
+  assert.equal(readProviderConfig({}).source, "nba-api");
+  assert.equal(makeNbaProvider({ env: {} }).source, "nba-api");
+  assert.equal(readProviderConfig({ NBA_DATA_PROVIDER: "balldontlie" }).source, "balldontlie");
   assert.equal(readProviderConfig({ NBA_DATA_PROVIDER: "api-nba" }).source, "api-nba");
   assert.equal(readProviderConfig({ NBA_DATA_PROVIDER: "nba-api" }).source, "nba-api");
   assert.equal(makeNbaProvider({ env: { NBA_DATA_PROVIDER: "nba-api" } }).source, "nba-api");

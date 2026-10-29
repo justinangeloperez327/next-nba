@@ -17,7 +17,7 @@ It deliberately **does not** simulate missing games. A blocked or invalid upstre
 
 ## Recommended local Docker setup
 
-Docker Compose builds a Node.js 24 application and a Python 3.12 bridge, exposes only the web server on port 3000, and selects `NBA_DATA_PROVIDER=nba-api`.
+Docker Compose builds a Node.js 24 application and a Python 3.12 bridge, exposes only the web server on port 3000, and uses the default `NBA_DATA_PROVIDER=nba-api`. No paid API key is used.
 
 1. Create a local `.env` containing **only a random secret token**, e.g. `NBA_API_BRIDGE_TOKEN=<your long random token>`. This file is ignored by Git.
 2. Run `docker compose up --build`.
@@ -25,7 +25,7 @@ Docker Compose builds a Node.js 24 application and a Python 3.12 bridge, exposes
 
 Neither NBA.com nor the Python bridge requires a subscription key, but the bridge requires a private bearer token to protect it against untrusted network clients. The token is never given to the browser. Rotate it if exposed.
 
-For development without Docker, use two terminals:
+For development without Docker, use two terminals. The Node.js provider also defaults to `nba-api`, but the Python bridge must still be started; setting the default does not automatically launch Python:
 
 ```bash
 # terminal 1 (Python 3.12+)
@@ -62,3 +62,7 @@ For a separately hosted bridge, use a non-public/private network with TLS and `N
 `python -m unittest discover -s bridge/tests -v` tests the Python bridge without live upstream calls. `npm test` tests the TypeScript adapter, normalization, secret handling and errors using mocked HTTP responses. CI also builds the Docker images.
 
 Real NBA.com access, historical `ScoreboardV3` connectivity, score fidelity, and end-to-end Compose execution on the intended host are manual release gates. Avoid claiming these as verified merely because CI is green.
+
+## Cost and availability
+
+The default data provider does not charge API subscription fees or require an NBA provider key. The `NBA_API_BRIDGE_TOKEN` is only an internal application secret; it is not purchased or obtained from an NBA data vendor. Running Docker locally does not incur a third-party NBA API fee. Remote hosting may still cost money, and neither availability of NBA.com's endpoints nor third-party data publication rights are guaranteed.

@@ -1,6 +1,6 @@
 # API-NBA as a second NBA data provider
 
-The application can run against BALLDONTLIE (default) or API-NBA. Provider selection is **server-only** so a visitor cannot force the server to spend another provider's quota.
+The application defaults to the free self-hosted `swar/nba_api` bridge. Commercial API-NBA and BALLDONTLIE are optional, explicitly selected alternatives. Provider selection is **server-only** so a visitor cannot force the server to spend another provider's quota.
 
 ## Activate API-NBA
 

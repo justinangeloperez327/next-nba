@@ -34,12 +34,12 @@ function mockedProvider(reply, options = {}) {
 }
 
 test("selection defaults to BALLDONTLIE and explicitly opts into API-NBA", () => {
-  assert.deepEqual(readProviderConfig({}), { source: "balldontlie", plan: "free" });
+  assert.deepEqual(readProviderConfig({}), { source: "nba-api", plan: "free" });
   assert.deepEqual(readProviderConfig({ NBA_DATA_PROVIDER: "api-nba" }), { source: "api-nba", plan: "free" });
   assert.deepEqual(readProviderConfig({ NBA_DATA_PROVIDER: "api-nba", API_NBA_PLAN: "pro" }), { source: "api-nba", plan: "pro" });
   assert.throws(() => readProviderConfig({ NBA_DATA_PROVIDER: "unknown" }));
   assert.throws(() => readProviderConfig({ API_NBA_PLAN: "mega" }));
-  assert.equal(makeNbaProvider({ env: {} }).source, "balldontlie");
+  assert.equal(makeNbaProvider({ env: {} }).source, "nba-api");
   assert.equal(makeNbaProvider({ env: { NBA_DATA_PROVIDER: "api-nba" } }).source, "api-nba");
 });
 

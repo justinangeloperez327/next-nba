@@ -1,13 +1,15 @@
 # BALLDONTLIE API integration — Group 2
 
-The app now exposes two server-side JSON endpoints backed by BALLDONTLIE:
+The app exposes two server-side JSON endpoints through the selected provider (default: free `swar/nba_api`). When BALLDONTLIE is explicitly selected, it backs these endpoints:
 
 - `GET /api/games?date=YYYY-MM-DD` (date optional, defaults to New York calendar day)
 - `GET /api/teams`
 
-**No frontend live scoreboard is connected yet** — the UI changes are Group 3 and 4.
+**The live scoreboard is connected.** This document describes the historical BALLDONTLIE adapter; use [Python bridge setup](nba-python.md) for the free default.
 
-## API key setup
+## Optional BALLDONTLIE API key setup
+
+To use this *non-default* adapter, set `NBA_DATA_PROVIDER=balldontlie` explicitly.
 
 1. Get an NBA API key from https://app.balldontlie.io/
 2. Copy `.env.example` to `.env.local`.
