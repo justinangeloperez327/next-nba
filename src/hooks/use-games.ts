@@ -26,7 +26,7 @@ function parseError(status: number, body: unknown, retryAfter: string | null): A
   const value = body && typeof body === "object" ? body as { error?: { code?: string } } : {};
   const code = value.error?.code ?? "";
   const messages: Record<string, string> = {
-    NOT_CONFIGURED: "NBA data is not configured. Set BALLDONTLIE_API_KEY on the server.",
+    NOT_CONFIGURED: "NBA data is not configured. Set the selected provider API key on the server.",
     AUTH: "NBA provider authentication failed. Check the server-side key.",
     RATE_LIMIT: "The NBA provider is rate-limited. Last received scores may be outdated.",
     TIMEOUT: "The NBA provider timed out.",
@@ -37,7 +37,7 @@ function parseError(status: number, body: unknown, retryAfter: string | null): A
   const error = new Error(messages[code] ??
     (status >= 500 ? "NBA scores are temporarily unavailable." : "Unable to load NBA games.")) as ApiError;
   error.terminal = code === "AUTH" || code === "NOT_CONFIGURED";
-  if (retryAfter && /^\d{1,4}$/.test(retryAfter)) {
+  if (retryAfter && /^\d{1,6}$/.test(retryAfter)) {
     error.retryAfterSeconds = Number(retryAfter);
   }
   return error;

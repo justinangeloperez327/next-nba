@@ -18,14 +18,23 @@ export class NbaQuotaGuard {
 
   private readonly now: () => number;
   private readonly limit: number;
+  private readonly dailyLimit: number;
+  private utcDay = -1;
+  private dailySpent = 0;
 
-  constructor(now: () => number = Date.now, limit = 4) {
+  constructor(now: () => number = Date.now, limit = 4, dailyLimit = Infinity) {
     this.now = now;
     this.limit = limit;
+    this.dailyLimit = dailyLimit;
   }
 
   beforeRequest(): void {
     const time = this.now();
+    const today = Math.floor(time / 86_400_000);
+    if (today !== this.utcDay) {
+      this.utcDay = today;
+      this.dailySpent = 0;
+    }
     if (time < this.blockedUntil) {
       throw new NbaProviderError("RATE_LIMIT", Math.ceil((this.blockedUntil - time) / 1000));
     }
@@ -33,11 +42,21 @@ export class NbaQuotaGuard {
     if (this.requests.length >= this.limit) {
       throw new NbaProviderError("RATE_LIMIT", Math.max(1, Math.ceil((this.requests[0] + 60_000 - time) / 1000)));
     }
+    if (this.dailySpent >= this.dailyLimit) {
+      const untilMidnight = Math.ceil(((today + 1) * 86_400_000 - time) / 1000);
+      throw new NbaProviderError("RATE_LIMIT", untilMidnight);
+    }
     this.requests.push(time);
+    this.dailySpent++;
   }
 
   block(seconds: number): void {
     this.blockedUntil = Math.max(this.blockedUntil, this.now() + Math.max(1, seconds) * 1000);
+  }
+
+  blockToNextUtcDay(): void {
+    const now = this.now();
+    this.block(Math.ceil((Math.floor(now / 86_400_000) + 1) * 86_400_000 / 1000 - now / 1000));
   }
 }
 
@@ -77,7 +96,7 @@ export class NbaFeedCache {
       try {
         const data = await this.provider.listGamesByDate(date);
         const fetchedAt = new Date(this.now()).toISOString();
-        const ttlSeconds = gameCacheSeconds(data, date, new Date(this.now()));
+        const ttlSeconds = Math.max(gameCacheSeconds(data, date, new Date(this.now())), this.provider.minimumGameCacheSeconds ?? 0);
         const fresh = { data, fetchedAt, expiresAt: this.now() + ttlSeconds * 1000 };
         this.games.delete(date);
         this.games.set(date, fresh);

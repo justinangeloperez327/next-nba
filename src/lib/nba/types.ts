@@ -1,3 +1,5 @@
+export type NbaDataSource = "balldontlie" | "api-nba";
+
 export type NbaGameStatus =
   | "scheduled" | "in_progress" | "final" | "postponed"
   | "canceled" | "delayed" | "suspended" | "abandoned" | "unknown";
@@ -31,12 +33,13 @@ export type NbaGame = {
 export type NbaProvider = {
   listGamesByDate(date: string): Promise<NbaGame[]>;
   listTeams(): Promise<NbaTeam[]>;
+  minimumGameCacheSeconds?: number;
 };
 
 export type GamesPayload = {
   date: string;
   games: NbaGame[];
-  source: "balldontlie";
+  source: NbaDataSource;
   fetchedAt: string;
   stale?: boolean;
   refreshAfterSeconds?: number;
@@ -44,6 +47,6 @@ export type GamesPayload = {
 
 export type TeamsPayload = {
   teams: NbaTeam[];
-  source: "balldontlie";
+  source: NbaDataSource;
   fetchedAt: string;
 };

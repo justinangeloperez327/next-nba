@@ -34,3 +34,9 @@ Vercel CDN cache headers reduce origin calls on cache hits, but the response can
 ## Monitoring and tests
 
 Run `npm test` for fake-clock tests covering intervals, coalescing, pagination-token consumption, cooldowns, stale recovery and terminal authentication failures. CI does not make live BALLDONTLIE calls. Validate real-world score accuracy and provider redistribution permissions before public release.
+
+## Optional API-NBA adapter
+
+API-NBA uses a UTC date filter rather than the NBA Eastern schedule date. The adapter queries two adjacent UTC dates and filters game start times into the selected New York day. Free accounts have 100 requests/day; this adapter enforces a minimum **3,600-second** cache TTL and a per-runtime 90/day budget. Paid `API_NBA_PLAN=pro` uses a **60-second minimum** (not a promise of exact score latency) and a higher local daily budget. The quotas are per instance, not global. A reported exhausted upstream daily budget blocks requests in the runtime until the next UTC day.
+
+See [API-NBA configuration and caveats](api-nba.md).

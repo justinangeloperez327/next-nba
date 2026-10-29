@@ -2,7 +2,7 @@ import { getNbaScheduleDate, isSupportedScheduleDate } from "./date.ts";
 import { NbaProviderError } from "./provider.ts";
 import { gameCacheSeconds } from "./polling.ts";
 import type { NbaFeedCache } from "./cache.ts";
-import type { GamesPayload, NbaProvider, TeamsPayload } from "./types.ts";
+import type { GamesPayload, NbaDataSource, NbaProvider, TeamsPayload } from "./types.ts";
 
 function json(body: unknown, status: number, cacheControl = "no-store", extras: HeadersInit = {}) {
   return Response.json(body, { status, headers: { "Cache-Control": cacheControl, ...extras } });
@@ -37,6 +37,7 @@ export async function serveGames(
   provider: NbaProvider,
   now: Date = new Date(),
   feed?: NbaFeedCache,
+  source: NbaDataSource = "balldontlie",
 ): Promise<Response> {
   const params = new URL(request.url).searchParams;
   const dates = params.getAll("date");
@@ -51,10 +52,10 @@ export async function serveGames(
   try {
     const result = feed ? await feed.getGames(date) : undefined;
     const games = result?.data ?? await provider.listGamesByDate(date);
-    const ttl = result?.ttlSeconds ?? gameCacheSeconds(games, date, now);
+    const ttl = result?.ttlSeconds ?? Math.max(gameCacheSeconds(games, date, now), provider.minimumGameCacheSeconds ?? 0);
     const stale = result?.stale ?? false;
     const payload: GamesPayload = {
-      date, games, source: "balldontlie",
+      date, games, source,
       fetchedAt: result?.fetchedAt ?? new Date().toISOString(),
       stale,
       refreshAfterSeconds: stale ? Math.max(30, result?.retryAfterSeconds ?? ttl) : ttl,
@@ -67,12 +68,12 @@ export async function serveGames(
   }
 }
 
-export async function serveTeams(provider: NbaProvider, feed?: NbaFeedCache): Promise<Response> {
+export async function serveTeams(provider: NbaProvider, feed?: NbaFeedCache, source: NbaDataSource = "balldontlie"): Promise<Response> {
   try {
     const result = feed ? await feed.getTeams() : undefined;
     const teams = result?.data ?? await provider.listTeams();
     const payload: TeamsPayload = {
-      teams, source: "balldontlie", fetchedAt: result?.fetchedAt ?? new Date().toISOString(),
+      teams, source, fetchedAt: result?.fetchedAt ?? new Date().toISOString(),
     };
     return json(payload, 200, headersFor(result?.ttlSeconds ?? 86_400));
   } catch (error) {
