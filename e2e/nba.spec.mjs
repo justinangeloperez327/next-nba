@@ -74,7 +74,7 @@ test("team directory search, conference filter and game navigation", async ({ pa
   await expect(page.getByText("Showing 30 of 30 teams")).toBeVisible();
   await page.getByRole("searchbox", { name: "Find a team" }).fill("celtics");
   await expect(page.getByText("Showing 1 of 30 teams")).toBeVisible();
-  await page.getByRole("link", { name: "View games for Boston Celtics" }).click();
+  await page.getByRole("link", { name: /Boston Celtics/ }).click();
   await expect(page).toHaveURL(/\/games\?team=BOS/);
   await expect(page.getByText("Team:")).toBeVisible();
   await expect(page.getByRole("link", { name: "All teams" })).toBeVisible();

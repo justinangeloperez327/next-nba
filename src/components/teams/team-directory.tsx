@@ -71,7 +71,6 @@ export function TeamDirectory() {
             <li key={team.abbreviation}>
               <Link
                 href={`/games?team=${team.abbreviation}`}
-                aria-label={`View games for ${team.name}`}
                 className="group flex min-h-24 items-center gap-4 border border-white/10 bg-[#111722] p-4 transition-colors hover:border-[#f07859]/60 hover:bg-[#17202d]"
               >
                 <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center border border-white/20 bg-white/[0.04] font-mono text-sm font-bold text-[#ffe0d3]">

@@ -24,10 +24,11 @@ function TeamLine({ game, side }: { game: NbaGame; side: "home" | "away" }) {
       <div className="flex min-w-0 items-center gap-3">
         <Link
           href={`/games?date=${game.date}&team=${encodeURIComponent(team.abbreviation)}`}
-          aria-label={`View ${team.fullName} games for ${game.date}`}
+
           className="grid size-11 shrink-0 place-items-center border border-white/20 bg-white/[0.04] font-mono text-xs font-bold text-[#ffe0d3] transition-colors hover:border-[#f07859] hover:bg-[#f07859]/10"
         >
           {team.abbreviation}
+          <span className="sr-only"> — View {team.fullName} games for {game.date}</span>
         </Link>
         <div className="min-w-0">
           <p className={`text-sm leading-5 sm:text-base ${
