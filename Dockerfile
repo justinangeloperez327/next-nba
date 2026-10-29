@@ -12,7 +12,6 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=build /app/package.json /app/package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build --chown=app:app /app/.next /app/.next
-COPY --from=build --chown=app:app /app/public /app/public
 COPY --from=build --chown=app:app /app/next.config.ts /app/next.config.ts
 USER app
 EXPOSE 3000

@@ -71,6 +71,11 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose build
+          trap 'docker compose down --remove-orphans' EXIT
+          docker compose up -d --no-build
+          curl --retry 15 --retry-connrefused --retry-all-errors --retry-delay 2 --fail --silent --show-error http://127.0.0.1:3000/api/health
+          curl --retry 8 --retry-all-errors --retry-delay 2 --fail --silent --show-error http://127.0.0.1:3000/api/teams -o /tmp/nba-teams.json
+          python -c "import json; p=json.load(open('/tmp/nba-teams.json')); assert p['source']=='nba-api'; assert len(p['teams'])==30; print('Private NBA Python bridge returned 30 real static teams')"
 
       - name: Upload browser failure report
         if: failure()
