@@ -173,8 +173,8 @@ export function createApiNbaProvider(options: ApiNbaOptions = {}): NbaProvider {
             period: entry.periods?.current ?? null,
             postseason: false, // Stage values do not reliably identify playoffs.
             homeTeam: home, awayTeam: away,
-            homeScore: entry.scores.home.points,
-            awayScore: entry.scores.visitors.points,
+            homeScore: entry.scores.home.points ?? null,
+            awayScore: entry.scores.visitors.points ?? null,
           });
           seen.add(entry.id);
         }
