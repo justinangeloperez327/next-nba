@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import type { NbaGame } from "../../lib/nba/types";
 import {
@@ -9,10 +10,7 @@ import {
   isGameWinner,
 } from "../../lib/nba/view";
 
-function subscribe() {
-  return () => {};
-}
-
+const subscribe = () => () => {};
 function useIsHydrated() {
   return useSyncExternalStore(subscribe, () => true, () => false);
 }
@@ -20,55 +18,71 @@ function useIsHydrated() {
 function TeamLine({ game, side }: { game: NbaGame; side: "home" | "away" }) {
   const team = side === "home" ? game.homeTeam : game.awayTeam;
   const winner = isGameWinner(game, side);
+  const score = displayGameScore(game, side);
   return (
-    <div className="flex items-center justify-between gap-3 py-2">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="grid size-11 shrink-0 place-items-center border border-white/15 bg-white/[0.04] text-xs font-extrabold text-[#e9ecf1]">
+        <Link
+          href={`/games?date=${game.date}&team=${encodeURIComponent(team.abbreviation)}`}
+          aria-label={`View ${team.fullName} games for ${game.date}`}
+          className="grid size-11 shrink-0 place-items-center border border-white/20 bg-white/[0.04] font-mono text-xs font-bold text-[#ffe0d3] transition-colors hover:border-[#f07859] hover:bg-[#f07859]/10"
+        >
           {team.abbreviation}
-        </span>
+        </Link>
         <div className="min-w-0">
-          <p className={`truncate text-sm sm:text-base ${winner ? "font-extrabold text-white" : "font-semibold text-[#dbe1ea]"}`}>
+          <p className={`text-sm leading-5 sm:text-base ${
+            winner ? "font-extrabold text-white" : "font-semibold text-[#dce4ee]"
+          }`}>
             {team.fullName}
           </p>
-          <p className="text-xs text-[#8995a6]">{side === "home" ? "Home" : "Away"}</p>
+          <p className="mt-0.5 text-xs text-[#a1afbe]">{side === "home" ? "Home" : "Away"}</p>
         </div>
       </div>
       <span
-        aria-label={`${team.fullName}: ${displayGameScore(game, side) === "—" ? "score unavailable" : `${displayGameScore(game, side)} points`}`}
-        className={`shrink-0 font-mono text-2xl tabular-nums sm:text-3xl ${winner ? "font-bold text-white" : "font-semibold text-[#b5c0cc]"}`}
+        aria-label={`${team.fullName}: ${score === "—" ? "score not available" : `${score} points`}`}
+        className={`min-w-9 text-right font-mono text-2xl tabular-nums sm:text-3xl ${
+          winner ? "font-bold text-white" : "font-semibold text-[#b9c6d5]"
+        }`}
       >
-        {displayGameScore(game, side)}
+        {score}
       </span>
     </div>
   );
 }
 
 export function GameCard({ game }: { game: NbaGame }) {
-  const isHydrated = useIsHydrated();
+  const hydrated = useIsHydrated();
   const isLive = game.status === "in_progress";
-  const tipoff = formatTipoff(game.tipoffAt, isHydrated);
+  const status = getGameStatusLabel(game);
+  const tipoff = formatTipoff(game.tipoffAt, hydrated);
 
   return (
     <article
-      aria-label={`${game.awayTeam.fullName} at ${game.homeTeam.fullName}: ${getGameStatusLabel(game)}`}
-      className="border border-white/10 bg-[#111722] p-5 sm:p-6"
+      aria-label={`${game.awayTeam.fullName} at ${game.homeTeam.fullName}: ${status}`}
+      className="h-full min-w-0 border border-white/10 bg-[#111722] p-4 sm:p-5"
     >
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
-        <span className={`text-xs font-bold uppercase tracking-[0.08em] ${isLive ? "text-[#ff9578]" : "text-[#aeb7c5]"}`}>
-          {isLive && <span aria-hidden="true" className="mr-2 inline-block size-2 rounded-full bg-[#f07859]" />}
-          {getGameStatusLabel(game)}
+      <header className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.06em] ${
+          isLive ? "text-[#ffab8c]" : "text-[#bbc7d5]"
+        }`}>
+          {isLive && <span aria-hidden="true" className="size-2 rounded-full bg-[#f07859]" />}
+          {status}
         </span>
-        <time dateTime={game.tipoffAt ?? undefined} className="text-xs text-[#96a3b4]">
+        <time
+          dateTime={game.tipoffAt ?? undefined}
+          title="Tip-off time in your local time zone"
+          className="text-xs text-[#a5b2c1]"
+        >
           {tipoff}
         </time>
       </header>
-      <div className="space-y-2">
+      <div className="space-y-1">
         <TeamLine game={game} side="away" />
         <TeamLine game={game} side="home" />
       </div>
       {game.postseason && (
-        <p className="mt-4 border-t border-white/10 pt-3 text-xs font-medium text-[#a2b0c1]">
-          Playoffs
+        <p className="mt-3 border-t border-white/10 pt-3 text-xs font-medium text-[#b3c0ce]">
+          Playoff game
         </p>
       )}
     </article>

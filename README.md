@@ -1,6 +1,6 @@
 # Next NBA
 
-An independent NBA scoreboard and schedule web app built with Next.js 16, TypeScript, React 19 and Tailwind CSS 4.
+An independent NBA scoreboard, schedule and team directory built with Next.js 16, TypeScript, React 19 and Tailwind CSS 4.
 
 ## Start locally
 
@@ -11,30 +11,32 @@ git clone https://github.com/justinangeloperez327/next-nba.git
 cd next-nba
 npm ci
 cp .env.example .env.local
-# Put BALLDONTLIE_API_KEY=your-key in .env.local
+# Edit .env.local and set BALLDONTLIE_API_KEY=your-key
 npm run dev
 ```
 
-Open http://localhost:3000. Never prefix the API key with `NEXT_PUBLIC_`.
+Open http://localhost:3000. API credentials must remain server-only.
 
-## Available features
+## Features
 
-- Homepage displaying today's NBA slate (up to three games).
-- Games dashboard at `/games`, shareable `?date=YYYY-MM-DD`, date navigation, local tip-off times, current game status and scores.
-- Automatic game-aware refresh; pauses for hidden tabs/offline and resumes when back online.
-- Last-known scores with stale indicators on transient provider failure.
-- Server-side response caching, in-process in-flight request deduplication, and a local upstream rate budget.
-- NBA team directory, and placeholder standings page.
-- Server-only BALLDONTLIE integration with validated, normalized responses.
-- Node.js 24 CI with `npm ci`, lint, type-check, tests and production build.
+- Responsive scoreboard homepage with priority given to games in progress.
+- `/games` with shareable `?date=YYYY-MM-DD&team=BOS` URLs, team and game-state filters, and NBA-day navigation.
+- `/teams` with 30 franchises, name/abbreviation search, conference tabs, and direct links to team schedules.
+- Compact accessible game cards, local tip-off times, loading/empty/error states and stale score notices.
+- Automatic game-aware refresh, server caching, per-runtime quota control and last-known score recovery.
+- Responsive navigation with active link indicators, accessible touch targets and reduced-motion preference support.
+- NBA data through a typed, validated, server-only BALLDONTLIE API adapter.
+- `/standings` remains an explicit placeholder until an authorized compatible standings feed is available.
 
-## Important deployment limitation
+## Important limits
 
-BALLDONTLIE Free permits **5 upstream requests per minute per API key**. The app deliberately limits each live server runtime to 4 upstream requests/minute, and sets shared CDN caching headers. On a multi-instance/serverless deployment, those instance-local budgets **do not combine into a globally enforced five-request limit**. CDN caching is regional and best effort. For significant public traffic, use a centrally coordinated quota/cache service or a paid plan and load-test before launch.
+Actual scores require `BALLDONTLIE_API_KEY`. No fabricated games or rankings are displayed.
+The free provider tier does **not** include all detailed stats and standings.
+The four-request-per-minute budget is per Node.js runtime, **not account-wide across serverless instances**.
+Live provider requests and multi-device screen testing still need verification before public release.
+Do not use protected league branding or images without the necessary rights.
 
-Cached score ages and refresh intervals are approximate. There is no WebSocket push, background worker or database in this group. An API key is required to view real games; tests use mocked upstream responses.
-
-## Validation
+## Development checks
 
 ```bash
 npm ci
@@ -44,15 +46,15 @@ npm test
 npm run build
 ```
 
-See [NBA API documentation](docs/nba-api.md) and [live updating](docs/live-scores.md).
+See [NBA API integration](docs/nba-api.md) and [live score behavior](docs/live-scores.md).
 
-## Project groups
+## Implementation groups
 
 1. ~~Repository hardening~~
 2. ~~NBA API integration~~
 3. ~~Games dashboard~~
-4. ~~Automatic live scores, cache, local rate budget and recovery~~
-5. UI completion
-6. Testing, security and release readiness
+4. ~~Live-score polling and cache~~
+5. ~~Responsive UI and team navigation~~
+6. Final security, end-to-end checks and release readiness
 
-This project is independent and not affiliated with or endorsed by the NBA. Verify public redistribution and trademark rights before launch.
+Next NBA is independent and is not affiliated with or endorsed by the NBA.

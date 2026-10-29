@@ -1,32 +1,8 @@
+import Link from "next/link";
 import { TodaysGames } from "../components/games/todays-games";
 import { getNbaScheduleDate } from "../lib/nba/date";
-import Link from "next/link";
 
-const sections = [
-  {
-    number: "01",
-    title: "Games",
-    description: "Explore NBA schedules, scores, and game results by date.",
-    href: "/games",
-    cta: "View games",
-  },
-  {
-    number: "02",
-    title: "Teams",
-    description: "Browse all 30 NBA franchises, organized by conference.",
-    href: "/teams",
-    cta: "Browse teams",
-  },
-  {
-    number: "03",
-    title: "Standings",
-    description: "Conference rankings and records once a data source is connected.",
-    href: "/standings",
-    cta: "View standings",
-  },
-] as const;
-
-// The NBA day is calculated per request, not frozen at build time.
+// Request-time NBA date prevents a stale homepage after the server date changes.
 export const dynamic = "force-dynamic";
 
 export default function Home() {
@@ -35,81 +11,79 @@ export default function Home() {
     <>
       <section className="relative overflow-hidden border-b border-white/10">
         <div aria-hidden="true" className="hero-grid pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-18 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-22">
           <div>
-            <p className="mb-5 inline-flex items-center gap-3 border border-[#e65d40]/40 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#ff967a]">
-              <span className="size-2 bg-[#e65d40]" aria-hidden="true" />
-              Basketball, simplified
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[#ffab8c]">
+              NBA · Games and scores
             </p>
-            <h1 className="max-w-xl text-5xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              THE GAME.<br />
-              <span className="text-[#f07859]">ONE PLACE.</span>
+            <h1 className="max-w-2xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Basketball.<span className="block text-[#f07859]">At a glance.</span>
             </h1>
-            <p className="mt-7 max-w-lg text-base leading-8 text-[#b8c0cc]">
-              A clean foundation for NBA schedules, scores, team profiles, and standings. Built for the basketball fan who wants the essentials.
+            <p className="mt-5 max-w-xl text-base leading-7 text-[#bdc8d5]">
+              Follow the NBA schedule, check scores, and browse all 30 teams.
+              Clear information, without the clutter.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/teams" className="inline-flex items-center justify-center bg-[#e65d40] px-6 py-3 text-sm font-bold text-[#141013] transition-colors hover:bg-[#ff8d6a]">
-                Explore teams
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href={`/games?date=${nbaDate}`}
+                className="inline-flex min-h-11 items-center justify-center bg-[#e65d40] px-5 text-sm font-bold text-[#141013] transition-colors hover:bg-[#ff9a77]">
+                View today&apos;s games <span aria-hidden="true" className="ml-3">→</span>
               </Link>
-              <Link href="/games" className="inline-flex items-center justify-center border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10">
-                Games hub
+              <Link href="/teams"
+                className="inline-flex min-h-11 items-center justify-center border border-white/20 px-5 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+                Explore teams
               </Link>
             </div>
           </div>
 
-          <div aria-hidden="true" className="relative mx-auto grid aspect-square w-full max-w-[480px] place-items-center">
-            <div className="absolute inset-[9%] rounded-full border border-[#ea7359]/15" />
-            <div className="absolute inset-[1%] rounded-full border border-white/5" />
-            <svg viewBox="0 0 440 440" role="presentation" className="relative z-10 h-full w-full drop-shadow-[0_25px_90px_rgba(230,93,64,0.22)]">
-              <defs>
-                <linearGradient id="ball" x1="0" x2="1" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#ffac79" />
-                  <stop offset="52%" stopColor="#e66546" />
-                  <stop offset="100%" stopColor="#9a3029" />
-                </linearGradient>
-                <clipPath id="ball-shape"><circle cx="220" cy="220" r="151" /></clipPath>
-              </defs>
-              <circle cx="220" cy="220" r="151" fill="url(#ball)" />
-              <g clipPath="url(#ball-shape)" stroke="#592521" strokeWidth="7" fill="none">
-                <path d="M69 220H371M220 69V371" />
-                <path d="M95 116C215 160 215 280 95 324M345 116C225 160 225 280 345 324" />
-                <path d="M118 86C150 179 290 179 322 86M118 354C150 261 290 261 322 354" />
-              </g>
-              <circle cx="220" cy="220" r="151" fill="none" stroke="#ffb28c" strokeOpacity=".35" strokeWidth="2" />
-            </svg>
-            <span className="absolute bottom-[3%] right-[1%] font-mono text-[11px] uppercase tracking-[0.25em] text-[#777f8d]">
-              Built for the game
-            </span>
+          <div className="border border-white/10 bg-[#111722]/90 p-5 sm:p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#ffab8c]">League essentials</p>
+            <div className="mt-5 divide-y divide-white/10">
+              <div className="flex items-baseline justify-between py-4">
+                <span className="text-sm text-[#bdc8d5]">NBA teams</span>
+                <span className="font-mono text-3xl font-bold tabular-nums text-white">30</span>
+              </div>
+              <div className="flex items-baseline justify-between py-4">
+                <span className="text-sm text-[#bdc8d5]">Conferences</span>
+                <span className="font-mono text-3xl font-bold tabular-nums text-white">02</span>
+              </div>
+              <div className="flex items-baseline justify-between py-4">
+                <span className="text-sm text-[#bdc8d5]">Game updates</span>
+                <span className="text-sm font-semibold text-[#ffb89d]">Automatic*</span>
+              </div>
+            </div>
+            <p className="mt-4 text-xs leading-6 text-[#a4b2c0]">
+              *Automatic refresh uses the configured data provider and pauses when inactive. No scores are simulated.
+            </p>
           </div>
         </div>
       </section>
 
       <TodaysGames date={nbaDate} />
 
-      <section className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
-        <div className="mb-9 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#f07859]">Explore</p>
-            <h2 className="text-3xl font-black tracking-tight text-white">Everything in reach.</h2>
-          </div>
-          <p className="max-w-xs text-sm leading-6 text-[#9fa9b8]">Game schedules and results are available now. Standings and detailed statistics will follow.</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {sections.map((section) => (
-            <Link key={section.href} href={section.href} className="group flex min-h-60 flex-col justify-between border border-white/10 bg-[#111722] p-7 transition-colors hover:border-[#e65d40]/60 hover:bg-[#151d2b]">
+      <section className="border-t border-white/10">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#ffab8c]">Explore</p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Find what matters.</h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Link href="/games" className="group flex min-h-36 flex-col justify-between border border-white/10 bg-[#111722] p-5 transition-colors hover:border-[#f07859]/60">
               <div>
-                <span className="font-mono text-xs text-[#f07859]">{section.number} / NBA</span>
-                <h3 className="mt-7 text-2xl font-extrabold text-white">{section.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-[#aeb6c3]">{section.description}</p>
+                <h3 className="text-xl font-bold text-white">Games</h3>
+                <p className="mt-2 text-sm leading-6 text-[#bdc8d5]">Schedules, results, and live game states by date.</p>
               </div>
-              <span className="mt-8 text-sm font-semibold text-[#ff9979] group-hover:text-white">{section.cta} <span aria-hidden="true">→</span></span>
+              <span className="mt-4 text-sm font-semibold text-[#ffab8c]">Open scoreboard <span aria-hidden="true">→</span></span>
             </Link>
-          ))}
+            <Link href="/teams" className="group flex min-h-36 flex-col justify-between border border-white/10 bg-[#111722] p-5 transition-colors hover:border-[#f07859]/60">
+              <div>
+                <h3 className="text-xl font-bold text-white">Teams</h3>
+                <p className="mt-2 text-sm leading-6 text-[#bdc8d5]">All franchises, conference filters, and team schedules.</p>
+              </div>
+              <span className="mt-4 text-sm font-semibold text-[#ffab8c]">Browse directory <span aria-hidden="true">→</span></span>
+            </Link>
+          </div>
+          <p className="mt-6 text-xs leading-6 text-[#9cabb9]">
+            Standings and detailed player statistics are not yet connected. NBA game data requires a server-side provider key.
+          </p>
         </div>
-        <p className="mt-8 border-l-2 border-[#e65d40] pl-4 text-sm leading-6 text-[#aeb6c3]">
-          Game data comes from BALLDONTLIE when configured. Scores are loaded on demand; automatic updates and standings are coming later.
-        </p>
       </section>
     </>
   );
