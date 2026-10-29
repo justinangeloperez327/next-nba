@@ -14,7 +14,7 @@ type DashboardProps = {
 
 export function GamesDashboard({ date, today, invalidRequestedDate }: DashboardProps) {
   const router = useRouter();
-  const { games, loading, error, fetchedAt, refresh } = useGames(date);
+  const { games, loading, refreshing, stale, online, error, fetchedAt, refresh, refreshAfterSeconds } = useGames(date);
   const summary = summarizeGames(games);
 
   function navigate(next: string) {
@@ -75,10 +75,10 @@ export function GamesDashboard({ date, today, invalidRequestedDate }: DashboardP
           <button
             type="button"
             onClick={refresh}
-            disabled={loading}
+            disabled={loading || refreshing}
             className="h-10 bg-[#e65d40] px-4 text-sm font-bold text-[#141013] hover:bg-[#ff8d6a] disabled:opacity-50"
           >
-            Refresh
+            {refreshing ? "Updating…" : "Refresh"}
           </button>
         </div>
       </div>
@@ -92,11 +92,21 @@ export function GamesDashboard({ date, today, invalidRequestedDate }: DashboardP
         </div>
         <p className="text-xs text-[#929eac]">
           {fetchedAt && !loading
-            ? `Data fetched ${fetchedAt.slice(0, 16).replace("T", " ")} UTC`
-            : "Scores refresh manually in this version"}
+            ? `Last updated ${fetchedAt.slice(0, 16).replace("T", " ")} UTC`
+            : "Awaiting game data"}
+          {refreshAfterSeconds && !loading ? ` · Refresh interval: ${refreshAfterSeconds}s` : ""}
+          {refreshing ? " · Updating…" : ""}
         </p>
       </div>
 
+      {stale && games.length > 0 && !loading && (
+        <p role="status" className="mt-5 border-l-2 border-[#f07859] bg-[#f07859]/10 p-4 text-sm text-[#ffccb9]">
+          Showing last received scores. {error ?? "The provider has not delivered a fresh update yet."}
+        </p>
+      )}
+      {!online && !loading && !stale && (
+        <p role="status" className="mt-5 text-sm text-[#ffccb9]">Offline — updates are paused.</p>
+      )}
       <div aria-live="polite" aria-busy={loading} className="mt-6">
         {loading ? (
           <div role="status" className="grid gap-4 md:grid-cols-2">
@@ -105,7 +115,7 @@ export function GamesDashboard({ date, today, invalidRequestedDate }: DashboardP
             ))}
             <span className="sr-only">Loading NBA games…</span>
           </div>
-        ) : error ? (
+        ) : error && games.length === 0 ? (
           <div role="alert" className="border border-white/15 bg-[#111722] p-8 text-center">
             <h2 className="text-lg font-bold text-white">Scores unavailable</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-[#aeb6c3]">{error}</p>
@@ -126,7 +136,8 @@ export function GamesDashboard({ date, today, invalidRequestedDate }: DashboardP
       </div>
       <p className="mt-6 text-xs leading-6 text-[#8d9aaa]">
         Games are grouped by the NBA&apos;s Eastern calendar date. Tip-off times display in your local time zone after page load.
-        Scores are fetched on page entry, date change, or manual refresh; automatic live updates arrive in Group 4.
+        Automatic updates adjust to the game state and pause while the tab is hidden or offline.
+        Refresh always respects the server cache and API quota safeguards.
       </p>
     </section>
   );

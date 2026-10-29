@@ -172,7 +172,7 @@ test("HTTP API returns typed payload, cached headers and default NBA date", asyn
   const res = await serveGames(new Request("https://example.test/api/games"), provider,
     new Date("2026-10-29T02:00:00Z"));
   assert.equal(res.status, 200);
-  assert.match(res.headers.get("cache-control"), /s-maxage=60/);
+  assert.match(res.headers.get("cache-control"), /s-maxage=300/);
   const payload = await res.json();
   assert.equal(payload.date, "2026-10-28");
   assert.equal(payload.source, "balldontlie");

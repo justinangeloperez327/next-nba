@@ -50,7 +50,7 @@ Error messages never contain API keys or raw provider responses. Upstream 429 `R
 - Uses the documented free-tier `/v1/games` and `/v1/teams` endpoints.
 - Uses `dates[]` with cursor pagination, `per_page=100`, deduplication, and a three-page safety cap; unexpected larger responses fail instead of silently truncating.
 - Each provider response is validated using Zod and normalized into application-facing types.
-- CDN caching headers: games 60 seconds, teams 24 hours. **This does not yet guarantee global rate-limit compliance**; shared request coalescing and game-aware refresh are in Group 4.
+- Game-aware CDN caching: 30 seconds for live games, longer for schedules/results, and 24 hours for teams. Local concurrency deduplication, a four-requests/minute upstream budget per runtime, stale fallback, and adaptive browser polling are implemented. This **does not guarantee global rate-limit compliance** across multiple serverless instances; see [live score caching](live-scores.md).
 - No database, credentials in client bundles, or fake scores.
 
 See https://docs.balldontlie.io/ for official API documentation. Confirm redistribution and trademark rights before public launch.

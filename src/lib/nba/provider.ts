@@ -30,6 +30,8 @@ export class NbaProviderError extends Error {
 export type ProviderOptions = {
   apiKey?: string;
   fetcher?: typeof fetch;
+  beforeRequest?: () => void;
+  onRateLimit?: (seconds?: number) => void;
 };
 
 function safeRetryAfter(header: string | null): number | undefined {
@@ -44,6 +46,9 @@ export function createBalldontlieProvider(options: ProviderOptions = {}): NbaPro
 
   async function request(url: URL): Promise<unknown> {
     if (!apiKey?.trim()) throw new NbaProviderError("NOT_CONFIGURED");
+    // A quota token is reserved for each individual upstream request, including
+    // additional cursor pages. Guard errors are preserved, not mapped to NETWORK.
+    options.beforeRequest?.();
     let response: Response;
     try {
       response = await fetcher(url, {
@@ -62,7 +67,9 @@ export function createBalldontlieProvider(options: ProviderOptions = {}): NbaPro
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) throw new NbaProviderError("AUTH");
       if (response.status === 429) {
-        throw new NbaProviderError("RATE_LIMIT", safeRetryAfter(response.headers.get("retry-after")));
+        const retryAfter = safeRetryAfter(response.headers.get("retry-after"));
+        options.onRateLimit?.(retryAfter);
+        throw new NbaProviderError("RATE_LIMIT", retryAfter);
       }
       throw new NbaProviderError("UPSTREAM");
     }

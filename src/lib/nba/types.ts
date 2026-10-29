@@ -1,13 +1,6 @@
 export type NbaGameStatus =
-  | "scheduled"
-  | "in_progress"
-  | "final"
-  | "postponed"
-  | "canceled"
-  | "delayed"
-  | "suspended"
-  | "abandoned"
-  | "unknown";
+  | "scheduled" | "in_progress" | "final" | "postponed"
+  | "canceled" | "delayed" | "suspended" | "abandoned" | "unknown";
 
 export type NbaTeam = {
   id: number;
@@ -45,6 +38,8 @@ export type GamesPayload = {
   games: NbaGame[];
   source: "balldontlie";
   fetchedAt: string;
+  stale?: boolean;
+  refreshAfterSeconds?: number;
 };
 
 export type TeamsPayload = {

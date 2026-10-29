@@ -1,12 +1,16 @@
 import { getNbaScheduleDate, isValidScheduleDate } from "./date.ts";
 import { NbaProviderError } from "./provider.ts";
+import { gameCacheSeconds } from "./polling.ts";
+import type { NbaFeedCache } from "./cache.ts";
 import type { GamesPayload, NbaProvider, TeamsPayload } from "./types.ts";
 
 function json(body: unknown, status: number, cacheControl = "no-store", extras: HeadersInit = {}) {
-  return Response.json(body, {
-    status,
-    headers: { "Cache-Control": cacheControl, ...extras },
-  });
+  return Response.json(body, { status, headers: { "Cache-Control": cacheControl, ...extras } });
+}
+
+function headersFor(ttl: number): string {
+  const seconds = Math.max(1, Math.floor(ttl));
+  return `public, max-age=0, s-maxage=${seconds}, stale-while-revalidate=${Math.min(seconds, 60)}`;
 }
 
 function upstreamFailure(error: unknown): Response {
@@ -24,9 +28,7 @@ function upstreamFailure(error: unknown): Response {
   } as const;
   const [status, message] = failures[error.code];
   const headers: Record<string, string> = {};
-  if (error.code === "RATE_LIMIT" && error.retryAfterSeconds !== undefined) {
-    headers["Retry-After"] = String(error.retryAfterSeconds);
-  }
+  if (error.retryAfterSeconds !== undefined) headers["Retry-After"] = String(error.retryAfterSeconds);
   return json({ error: { code: error.code, message } }, status, "no-store", headers);
 }
 
@@ -34,42 +36,45 @@ export async function serveGames(
   request: Request,
   provider: NbaProvider,
   now: Date = new Date(),
+  feed?: NbaFeedCache,
 ): Promise<Response> {
   const params = new URL(request.url).searchParams;
-  const allDates = params.getAll("date");
-  if (allDates.length > 1) {
+  const dates = params.getAll("date");
+  if (dates.length > 1) {
     return json({ error: { code: "INVALID_DATE", message: "Specify exactly one date." } }, 400);
   }
-  const date = allDates.length === 1 ? allDates[0] : getNbaScheduleDate(now);
+  const date = dates.length === 1 ? dates[0] : getNbaScheduleDate(now);
   if (!isValidScheduleDate(date)) {
     return json({ error: { code: "INVALID_DATE", message: "Date must be a real YYYY-MM-DD calendar date." } }, 400);
   }
 
   try {
-    const games = await provider.listGamesByDate(date);
+    const result = feed ? await feed.getGames(date) : undefined;
+    const games = result?.data ?? await provider.listGamesByDate(date);
+    const ttl = result?.ttlSeconds ?? gameCacheSeconds(games, date, now);
+    const stale = result?.stale ?? false;
     const payload: GamesPayload = {
-      date,
-      games,
-      source: "balldontlie",
-      fetchedAt: new Date().toISOString(),
+      date, games, source: "balldontlie",
+      fetchedAt: result?.fetchedAt ?? new Date().toISOString(),
+      stale,
+      refreshAfterSeconds: stale ? Math.max(30, result?.retryAfterSeconds ?? ttl) : ttl,
     };
-    // CDN-level caching is a conservative interim policy. Group 4 will add
-    // game-aware cache durations, quota management, and request coalescing.
-    return json(payload, 200, "public, s-maxage=60, stale-while-revalidate=120");
+    const response = json(payload, 200, headersFor(stale ? 15 : ttl));
+    if (stale) response.headers.set("X-Data-Stale", "1");
+    return response;
   } catch (error) {
     return upstreamFailure(error);
   }
 }
 
-export async function serveTeams(provider: NbaProvider): Promise<Response> {
+export async function serveTeams(provider: NbaProvider, feed?: NbaFeedCache): Promise<Response> {
   try {
-    const teams = await provider.listTeams();
+    const result = feed ? await feed.getTeams() : undefined;
+    const teams = result?.data ?? await provider.listTeams();
     const payload: TeamsPayload = {
-      teams,
-      source: "balldontlie",
-      fetchedAt: new Date().toISOString(),
+      teams, source: "balldontlie", fetchedAt: result?.fetchedAt ?? new Date().toISOString(),
     };
-    return json(payload, 200, "public, s-maxage=86400, stale-while-revalidate=86400");
+    return json(payload, 200, headersFor(result?.ttlSeconds ?? 86_400));
   } catch (error) {
     return upstreamFailure(error);
   }

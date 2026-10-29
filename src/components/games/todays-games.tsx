@@ -6,7 +6,7 @@ import { formatScheduleDate } from "../../lib/nba/view";
 import { GameCard } from "./game-card";
 
 export function TodaysGames({ date }: { date: string }) {
-  const { games, loading, error, refresh } = useGames(date);
+  const { games, loading, refreshing, stale, error, refresh, fetchedAt, refreshAfterSeconds } = useGames(date);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-14 lg:py-16" aria-label="Today's NBA games">
@@ -20,6 +20,11 @@ export function TodaysGames({ date }: { date: string }) {
           Full schedule <span aria-hidden="true">→</span>
         </Link>
       </div>
+      {stale && games.length > 0 && (
+        <p role="status" className="mb-5 border-l-2 border-[#f07859] bg-[#f07859]/10 px-4 py-3 text-xs text-[#ffccb9]">
+          Last-known scores — {error ?? "Awaiting a fresh update."}
+        </p>
+      )}
       <div aria-live="polite" aria-busy={loading}>
         {loading ? (
           <div role="status" className="grid gap-4 md:grid-cols-3">
@@ -28,7 +33,7 @@ export function TodaysGames({ date }: { date: string }) {
             ))}
             <span className="sr-only">Loading today&apos;s games…</span>
           </div>
-        ) : error ? (
+        ) : error && games.length === 0 ? (
           <div className="flex flex-wrap items-center justify-between gap-4 border border-white/10 bg-[#111722] p-6">
             <p role="alert" className="text-sm text-[#b8c3d0]">{error}</p>
             <button type="button" onClick={refresh} className="border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
@@ -45,7 +50,12 @@ export function TodaysGames({ date }: { date: string }) {
           </div>
         )}
       </div>
-      <p className="mt-5 text-xs text-[#8e9ba9]">Scores update on page load or manual refresh; automatic refreshing is planned for Group 4.</p>
+      <p className="mt-5 text-xs text-[#8e9ba9]">
+        {refreshing ? "Updating scores… " : ""}
+        {fetchedAt ? `Last fetched ${fetchedAt.slice(0, 16).replace("T", " ")} UTC. ` : ""}
+        Automatic refresh {refreshAfterSeconds ? `every ${refreshAfterSeconds}s while active.` : "pauses when data is unavailable."}
+        <button type="button" onClick={refresh} disabled={loading || refreshing} className="ml-2 underline hover:text-white disabled:opacity-50">Refresh now</button>
+      </p>
     </section>
   );
 }
