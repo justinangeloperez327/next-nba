@@ -1,12 +1,11 @@
 # Next NBA
 
-A modern, independent NBA web application using Next.js 16, TypeScript, React 19 and Tailwind CSS 4.
+An independent NBA web app built with Next.js 16, TypeScript, React 19 and Tailwind CSS 4.
 
 ## Requirements
 
-- **Node.js 24** (see `.nvmrc`)
-- npm
-- No API key is required for the initial scaffold. Live NBA scores are not connected yet.
+- Node.js 24 and npm (see `.nvmrc`)
+- BALLDONTLIE API key for real data; CI/test suite uses mocks without a key.
 
 ## Getting started
 
@@ -14,6 +13,8 @@ A modern, independent NBA web application using Next.js 16, TypeScript, React 19
 git clone https://github.com/justinangeloperez327/next-nba.git
 cd next-nba
 npm ci
+cp .env.example .env.local
+# Add BALLDONTLIE_API_KEY=your-key to .env.local
 npm run dev
 ```
 
@@ -23,30 +24,32 @@ Open http://localhost:3000.
 
 | Command | Description |
 | --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Create a production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Check TypeScript |
-| `npm test` | Run automated tests (Node.js built-in test runner) |
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript checking |
+| `npm test` | Node.js automated tests |
 
-## Initial scope
+## Current functionality
 
-- Responsive NBA-themed homepage and navigation.
-- Directory of 30 NBA teams.
-- Placeholder routes for games and standings; **no live data is connected**.
-- GitHub Actions CI with Node.js 24, deterministic `npm ci`, lint, typecheck, tests and production build.
+- Responsive starter page, NBA team directory, games and standings placeholders.
+- BALLDONTLIE server-only integration with typed/validated game and team data.
+- `GET /api/games?date=YYYY-MM-DD` and `GET /api/teams` endpoints.
+- API errors, pagination, input validation and CDN cache headers.
+- Node.js 24 GitHub Actions checks for lint, type-check, tests and build.
+
+The frontend does **not** yet display live NBA data. Connecting schedules and results to the UI is Group 3. Live refresh and quota-aware caching will be introduced in Group 4.
+
+See [API integration details](docs/nba-api.md) for environment setup, API shape, and limitations.
 
 ## Roadmap
 
-1. Integrate a permitted NBA data provider.
-2. Build schedules, live scores, and results with shared caching.
-3. Improve team pages and add game details.
-4. Expand to standings and player stats when supported by the API tier and rights.
+1. ~~Repository hardening and deterministic CI~~
+2. ~~NBA API integration~~
+3. Games dashboard and schedule navigation
+4. Live-score engine, shared caching and quota protection
+5. UI completion
+6. Testing, security and release readiness
 
-## Development notes
-
-- Commit `package-lock.json` when updating dependencies.
-- Use `npm ci` for reproducible installs in CI and clean environments.
-- Never commit API keys; use environment variables.
-- The project is independent and not affiliated with or endorsed by the NBA.
+This project is independent and not affiliated with or endorsed by the NBA. Verify publication rights before public launch.

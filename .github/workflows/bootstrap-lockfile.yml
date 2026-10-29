@@ -1,0 +1,27 @@
+name: Bootstrap Group 2 lockfile (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/bootstrap-lockfile.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Refresh dependency lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit lockfile
+        run: |
+          git add package-lock.json
+          git diff --cached --exit-code && exit 0
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: update lockfile for NBA API validation'
+          git push origin HEAD:main
