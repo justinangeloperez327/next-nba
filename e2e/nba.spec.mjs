@@ -60,9 +60,9 @@ async function serveMockGames(page) {
 test("homepage shows provider-backed cards without overflowing narrow viewports", async ({ page }) => {
   await serveMockGames(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Basketball.*At a glance/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Stay close.*game/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Today.s games/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Explore teams" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /All 30.*Your one/ })).toBeVisible();
   await expect.poll(() =>
     page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
   ).toBeLessThanOrEqual(1);
