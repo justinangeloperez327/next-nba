@@ -1,10 +1,12 @@
+import { TodaysGames } from "../components/games/todays-games";
+import { getNbaScheduleDate } from "../lib/nba/date";
 import Link from "next/link";
 
 const sections = [
   {
     number: "01",
     title: "Games",
-    description: "A future home for schedules, scores, and game details.",
+    description: "Explore NBA schedules, scores, and game results by date.",
     href: "/games",
     cta: "View games",
   },
@@ -24,7 +26,11 @@ const sections = [
   },
 ] as const;
 
+// The NBA day is calculated per request, not frozen at build time.
+export const dynamic = "force-dynamic";
+
 export default function Home() {
+  const nbaDate = getNbaScheduleDate();
   return (
     <>
       <section className="relative overflow-hidden border-b border-white/10">
@@ -79,13 +85,15 @@ export default function Home() {
         </div>
       </section>
 
+      <TodaysGames date={nbaDate} />
+
       <section className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
         <div className="mb-9 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#f07859]">Explore</p>
             <h2 className="text-3xl font-black tracking-tight text-white">Everything in reach.</h2>
           </div>
-          <p className="max-w-xs text-sm leading-6 text-[#9fa9b8]">Starting with team directories, then expanding into live basketball data.</p>
+          <p className="max-w-xs text-sm leading-6 text-[#9fa9b8]">Game schedules and results are available now. Standings and detailed statistics will follow.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {sections.map((section) => (
@@ -100,7 +108,7 @@ export default function Home() {
           ))}
         </div>
         <p className="mt-8 border-l-2 border-[#e65d40] pl-4 text-sm leading-6 text-[#aeb6c3]">
-          Live games and standings are not connected yet. No fabricated match data is displayed.
+          Game data comes from BALLDONTLIE when configured. Scores are loaded on demand; automatic updates and standings are coming later.
         </p>
       </section>
     </>
