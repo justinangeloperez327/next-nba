@@ -1,0 +1,27 @@
+name: Bootstrap Group 6 lockfile (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/bootstrap-lockfile.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Refresh locked dependencies
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit package-lock.json
+        run: |
+          git add package-lock.json
+          git diff --cached --exit-code && exit 0
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: lock Playwright and axe test dependencies'
+          git push origin HEAD:main

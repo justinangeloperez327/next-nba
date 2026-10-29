@@ -1,60 +1,68 @@
 # Next NBA
 
-An independent NBA scoreboard, schedule and team directory built with Next.js 16, TypeScript, React 19 and Tailwind CSS 4.
+A lightweight, independent NBA scoreboard, schedule, and team directory powered by Next.js 16, React 19, TypeScript, Tailwind CSS 4 and BALLDONTLIE.
 
-## Start locally
+## Local setup
 
-Requirements: Node.js 24, npm, and a BALLDONTLIE NBA API key.
+Requirements: **Node.js 24** and npm.
 
 ```bash
 git clone https://github.com/justinangeloperez327/next-nba.git
 cd next-nba
 npm ci
 cp .env.example .env.local
-# Edit .env.local and set BALLDONTLIE_API_KEY=your-key
+# Add your private BALLDONTLIE_API_KEY to .env.local
 npm run dev
 ```
 
-Open http://localhost:3000. API credentials must remain server-only.
+Open http://localhost:3000. Never use `NEXT_PUBLIC_` for provider keys.
 
 ## Features
 
-- Responsive scoreboard homepage with priority given to games in progress.
-- `/games` with shareable `?date=YYYY-MM-DD&team=BOS` URLs, team and game-state filters, and NBA-day navigation.
-- `/teams` with 30 franchises, name/abbreviation search, conference tabs, and direct links to team schedules.
-- Compact accessible game cards, local tip-off times, loading/empty/error states and stale score notices.
-- Automatic game-aware refresh, server caching, per-runtime quota control and last-known score recovery.
-- Responsive navigation with active link indicators, accessible touch targets and reduced-motion preference support.
-- NBA data through a typed, validated, server-only BALLDONTLIE API adapter.
-- `/standings` remains an explicit placeholder until an authorized compatible standings feed is available.
+- Responsive homepage prioritizing active NBA matchups.
+- `/games` daily scoreboard, game status filtering, date navigation, and team-specific schedule links.
+- `/teams` 30-team searchable directory and conference filters.
+- Game-state-aware score refresh, process-level request coalescing and cached last-known results.
+- Server-side BALLDONTLIE adapter with validated response schemas, bounded error state, historical-date constraints, and sanitized errors.
+- Server response security headers, disabled framework-identification header, reduced-motion behavior.
+- Automated Node.js 24 CI for dependency audit, lint, type checking, unit/API tests, production build, mobile/desktop browser tests and accessibility scans.
 
-## Important limits
+No provider credentials or fabricated NBA scores are used in CI; browser tests mock responses at the network boundary.
 
-Actual scores require `BALLDONTLIE_API_KEY`. No fabricated games or rankings are displayed.
-The free provider tier does **not** include all detailed stats and standings.
-The four-request-per-minute budget is per Node.js runtime, **not account-wide across serverless instances**.
-Live provider requests and multi-device screen testing still need verification before public release.
-Do not use protected league branding or images without the necessary rights.
+## Development commands
 
-## Development checks
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start development mode |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript |
+| `npm test` | Node.js unit, API and cache tests |
+| `npm run build` | Production build |
+| `npx playwright install chromium` | Install local browser |
+| `npm run test:e2e` | Run browser tests after `npm run build` |
+| `npm run test:e2e:ui` | Interactive browser test UI |
+| `npm audit --omit=dev --audit-level=high` | Production dependency audit |
 
-```bash
-npm ci
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
+## Deployment status
 
-See [NBA API integration](docs/nba-api.md) and [live score behavior](docs/live-scores.md).
+**CI-ready does not mean publicly released.** No production deployment has been made automatically. The following must be checked before public release:
 
-## Implementation groups
+1. Configure a real `BALLDONTLIE_API_KEY` in the hosting environment and verify legitimate provider data.
+2. Verify permitted redistribution of scores and legal use of any NBA/club trademarks.
+3. Confirm provider request volume under intended concurrent traffic. The four-requests/minute quota is **per server instance**, not global.
+4. For meaningful public serverless traffic, implement a distributed provider quota and cache, or choose a plan/architecture that safely supports traffic.
+5. Manually inspect mobile layouts, keyboard and screen-reader use and assess a strict CSP for the chosen deployment platform.
+6. Complete live-game score/status transition testing and incident recovery.
+
+See [release checklist](docs/release-readiness.md), [security policy](SECURITY.md), [NBA API](docs/nba-api.md) and [refresh strategy](docs/live-scores.md).
+
+## Project groups
 
 1. ~~Repository hardening~~
 2. ~~NBA API integration~~
 3. ~~Games dashboard~~
-4. ~~Live-score polling and cache~~
-5. ~~Responsive UI and team navigation~~
-6. Final security, end-to-end checks and release readiness
+4. ~~Live-score engine~~
+5. ~~UI completion~~
+6. ~~Release hardening and automated verification~~
 
-Next NBA is independent and is not affiliated with or endorsed by the NBA.
+This is an independent project, not affiliated with or endorsed by the NBA.

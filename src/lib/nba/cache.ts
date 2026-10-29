@@ -91,9 +91,20 @@ export class NbaFeedCache {
         const error = unknownError instanceof NbaProviderError ? unknownError : new NbaProviderError("UPSTREAM");
         const count = (this.failures.get(date)?.count ?? 0) + 1;
         const retry = retryDelaySeconds(count, error.retryAfterSeconds);
+        // Avoid retaining an unbounded failure key per arbitrary request date.
+        this.failures.delete(date);
         this.failures.set(date, { error, retryAt: this.now() + retry * 1000, count });
+        if (this.failures.size > 128) {
+          const oldest = this.failures.keys().next().value;
+          if (oldest !== undefined) this.failures.delete(oldest);
+        }
         const old = this.games.get(date);
-        if (old) return this.result(old, 15, true, retry);
+        // Never serve indefinitely old live scores or stale data when the
+        // provider explicitly rejects the configured credentials.
+        if (old && this.now() - Date.parse(old.fetchedAt) <= 6 * 3_600_000 &&
+            error.code !== "AUTH" && error.code !== "NOT_CONFIGURED") {
+          return this.result(old, 15, true, retry);
+        }
         throw new NbaProviderError(error.code, retry);
       }
     })();

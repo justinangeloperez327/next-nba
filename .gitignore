@@ -23,3 +23,8 @@
 # Tooling
 *.tsbuildinfo
 .vercel
+
+# Browser and accessibility testing
+/playwright-report/
+/test-results/
+/playwright/.cache/

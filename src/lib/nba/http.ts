@@ -1,4 +1,4 @@
-import { getNbaScheduleDate, isValidScheduleDate } from "./date.ts";
+import { getNbaScheduleDate, isSupportedScheduleDate } from "./date.ts";
 import { NbaProviderError } from "./provider.ts";
 import { gameCacheSeconds } from "./polling.ts";
 import type { NbaFeedCache } from "./cache.ts";
@@ -44,8 +44,8 @@ export async function serveGames(
     return json({ error: { code: "INVALID_DATE", message: "Specify exactly one date." } }, 400);
   }
   const date = dates.length === 1 ? dates[0] : getNbaScheduleDate(now);
-  if (!isValidScheduleDate(date)) {
-    return json({ error: { code: "INVALID_DATE", message: "Date must be a real YYYY-MM-DD calendar date." } }, 400);
+  if (!isSupportedScheduleDate(date, now)) {
+    return json({ error: { code: "INVALID_DATE", message: "Date must be a supported NBA schedule date (1946 through one year ahead)." } }, 400);
   }
 
   try {
