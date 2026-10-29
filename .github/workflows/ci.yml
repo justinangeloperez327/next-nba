@@ -15,8 +15,9 @@ concurrency:
 
 jobs:
   validate:
+    name: Lint, type-check, test, build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -25,17 +26,19 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '24'
+          cache: 'npm'
 
-      # No lockfile in the initial scaffold; generate and commit it after
-      # the first local install, then switch this command to npm ci.
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
 
       - name: Type-check
         run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
 
       - name: Build
         run: npm run build
