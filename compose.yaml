@@ -1,0 +1,26 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NBA_DATA_PROVIDER: nba-api
+      NBA_API_BRIDGE_URL: http://nba-api-bridge:8765
+      NBA_API_BRIDGE_TOKEN: "${NBA_API_BRIDGE_TOKEN:?Set NBA_API_BRIDGE_TOKEN in your environment}"
+    ports:
+      - "3000:3000"
+    depends_on:
+      nba-api-bridge:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nba-api-bridge:
+    build:
+      context: .
+      dockerfile: bridge/Dockerfile
+    environment:
+      NBA_API_BRIDGE_TOKEN: "${NBA_API_BRIDGE_TOKEN:?Set NBA_API_BRIDGE_TOKEN in your environment}"
+    # Not published to host; only accessible on the private Compose network.
+    expose:
+      - "8765"
+    restart: unless-stopped

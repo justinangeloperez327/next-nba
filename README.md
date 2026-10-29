@@ -1,59 +1,61 @@
 # Next NBA
 
-A lightweight, independent NBA scoreboard, schedule, and team directory powered by Next.js 16, React 19, TypeScript, and Tailwind CSS 4.
+An independent NBA scoreboard, schedules, and teams website built with Next.js 16, React 19, TypeScript and Tailwind CSS 4.
 
-## Local setup
+## NBA data providers
 
-Node.js 24 and npm are required.
+Three mutually exclusive, server-selected adapters share the same game/team contract:
+
+| `NBA_DATA_PROVIDER` | Upstream | Setup |
+| --- | --- | --- |
+| `nba-api` | [swar/nba_api](https://github.com/swar/nba_api) via an authenticated local Python bridge | No NBA API key; run Python 3.12 / Docker Compose |
+| `balldontlie` | BALLDONTLIE (existing default) | `BALLDONTLIE_API_KEY` |
+| `api-nba` | API-Sports API-NBA (commercial, unrelated to swar/nba_api) | `API_NBA_KEY` and `API_NBA_PLAN` |
+
+**To run the swar/nba_api integration with one command:**
 
 ```bash
 git clone https://github.com/justinangeloperez327/next-nba.git
 cd next-nba
-npm ci
-cp .env.example .env.local
-# Set NBA_DATA_PROVIDER and the matching server-side API key
-npm run dev
+# Create a private random bridge token in a local .env file:
+# NBA_API_BRIDGE_TOKEN=<random value>
+docker compose up --build
 ```
 
-**Choose the provider through the server environment**:
+Open http://localhost:3000. The Compose Python bridge is private to the Compose network and authenticates requests with a bearer token. For local development without Docker, follow [Python bridge instructions](docs/nba-python.md).
 
-- `NBA_DATA_PROVIDER=balldontlie` (default) plus `BALLDONTLIE_API_KEY`.
-- `NBA_DATA_PROVIDER=api-nba` plus `API_NBA_KEY` and `API_NBA_PLAN=free`.
-- With a real paid API-NBA subscription you can set `API_NBA_PLAN=pro`.
+The Python library wraps the *unofficial* endpoints behind NBA.com. It is **not an NBA data license**, is not endorsed by the NBA, and can be rate-limited or blocked from cloud-hosting IPs (especially `stats.nba.com`). Today's games use its live CDN scoreboard; other dates use `ScoreboardV3`. A blocked historical request is an error, not an invented empty game day. Do not assume this is safe for public commercial redistribution without separate NBA rights.
 
-Never use `NEXT_PUBLIC_` for secrets. The provider is server-selected, not visitor-selectable. Changes require server restart or a new deployment. There is no automatic cross-provider fallback.
-
-See [API-NBA setup](docs/api-nba.md).
-
-## Features
-
-- Responsive homepage prioritizing live games, conference/team directory and daily scoreboard.
-- `/games` with date navigation, team schedules and status filters.
-- BALLDONTLIE and API-NBA adapters sharing one normalized data contract.
-- Provider-aware caching, in-process request coalescing and instance-local quota protection.
-- Error sanitization, stale-score reporting, accessibility and mobile support.
-- Node.js 24 CI: dependency audit, lint, TypeScript, unit tests, production build, Playwright and axe accessibility.
-
-## Important limits
-
-- Real data requires the relevant API key; CI exercises mocks, not live API calls.
-- **API-NBA Free** allows 100 requests per UTC day. One NBA Eastern day requires two UTC-date requests; the default API-NBA free scoreboard cache is therefore at least **one hour**. Paid mode uses at least 60 seconds and requires a valid paid plan.
-- In-memory quota guards are **not global** across serverless instances, regions or cold starts. Use shared quota enforcement before high-traffic public deployment.
-- API-NBA terms do **not** grant permission to publish third-party league data. Verify required NBA rights before a public launch.
-- Standings and player-stats UI remain separate future work; no licensed logos or fake scores have been introduced.
-
-## Development checks
+### Existing Node.js workflow
 
 ```bash
 npm ci
+cp .env.example .env.local
+# Set NBA_DATA_PROVIDER and the matching server-side settings
+npm run dev
+```
+
+The existing providers remain available. Switching providers requires restarting or redeploying the backend. There is no automatic fallback or browser-controlled provider selection. Never expose `NBA_API_BRIDGE_TOKEN` or provider keys via `NEXT_PUBLIC_`.
+
+## Features
+
+- Responsive live-first home and date/team-filtered game dashboard.
+- Searchable 30-team directory, game states, scores, Eastern/UTC date handling.
+- Server caching, rate guards and stale-data warnings (all instance-local).
+- CI: Node.js 24, Python bridge tests, TypeScript, unit/API tests, production builds, Playwright, axe accessibility, container configuration/build.
+
+## Validation
+
+```bash
 npm run lint
 npm run typecheck
 npm test
 npm run build
+python -m unittest discover -s bridge/tests -v
 npx playwright install chromium
 npm run test:e2e
 ```
 
-See [API-NBA](docs/api-nba.md), [live-score cache](docs/live-scores.md), [release checklist](docs/release-readiness.md), and [security policy](SECURITY.md).
+Check [Python bridge deployment](docs/nba-python.md), [release readiness](docs/release-readiness.md), [API-NBA](docs/api-nba.md), and [live caching](docs/live-scores.md).
 
-Next NBA is an independent project and is not affiliated with or endorsed by the NBA.
+This application is independent and is not affiliated with or endorsed by the NBA.

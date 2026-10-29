@@ -1,4 +1,4 @@
-export type NbaDataSource = "balldontlie" | "api-nba";
+export type NbaDataSource = "balldontlie" | "api-nba" | "nba-api";
 
 export type NbaGameStatus =
   | "scheduled" | "in_progress" | "final" | "postponed"

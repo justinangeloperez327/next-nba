@@ -43,6 +43,19 @@ jobs:
       - name: Unit and API tests
         run: npm test
 
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Python bridge dependencies
+        run: python -m pip install -r bridge/requirements.txt
+
+      - name: Verify nba_api imports and Python bridge tests
+        run: |
+          python -c "from nba_api.live.nba.endpoints import scoreboard; from nba_api.stats.endpoints import ScoreboardV3; from nba_api.stats.static import teams; print('NBA Python imports verified')"
+          python -m unittest discover -s bridge/tests -v
+
       - name: Build
         run: npm run build
 
@@ -51,6 +64,13 @@ jobs:
 
       - name: Desktop/mobile browser and accessibility tests
         run: npm run test:e2e
+
+      - name: Validate and build Docker Compose services
+        env:
+          NBA_API_BRIDGE_TOKEN: ci-test-not-a-real-secret
+        run: |
+          docker compose config --quiet
+          docker compose build
 
       - name: Upload browser failure report
         if: failure()

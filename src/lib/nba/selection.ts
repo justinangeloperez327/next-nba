@@ -1,4 +1,5 @@
 import { createApiNbaProvider } from "./api-nba.ts";
+import { createNbaPythonProvider } from "./nba-python.ts";
 import { createBalldontlieProvider } from "./provider.ts";
 import type { NbaDataSource, NbaProvider } from "./types.ts";
 
@@ -9,14 +10,14 @@ export type ProviderConfig = {
 
 export function readProviderConfig(env: Record<string, string | undefined> = process.env): ProviderConfig {
   const raw = env.NBA_DATA_PROVIDER?.trim();
-  if (raw && raw !== "balldontlie" && raw !== "api-nba") {
-    throw new Error("NBA_DATA_PROVIDER must be balldontlie or api-nba");
+  if (raw && raw !== "balldontlie" && raw !== "api-nba" && raw !== "nba-api") {
+    throw new Error("NBA_DATA_PROVIDER must be balldontlie, api-nba or nba-api");
   }
   const plan = env.API_NBA_PLAN === "pro" ? "pro" : "free";
   if (env.API_NBA_PLAN && !["free", "pro"].includes(env.API_NBA_PLAN)) {
     throw new Error("API_NBA_PLAN must be free or pro");
   }
-  return { source: raw === "api-nba" ? "api-nba" : "balldontlie", plan };
+  return { source: raw === "api-nba" ? "api-nba" : raw === "nba-api" ? "nba-api" : "balldontlie", plan };
 }
 
 export type FactoryOptions = {
@@ -44,6 +45,16 @@ export function makeNbaProvider(options: FactoryOptions = {}): {
       provider: createApiNbaProvider({
         ...shared, apiKey: env.API_NBA_KEY, plan: config.plan,
         onQuotaExhausted: options.onQuotaExhausted,
+      }),
+      ...config,
+    };
+  }
+  if (config.source === "nba-api") {
+    return {
+      provider: createNbaPythonProvider({
+        ...shared,
+        baseUrl: env.NBA_API_BRIDGE_URL,
+        token: env.NBA_API_BRIDGE_TOKEN,
       }),
       ...config,
     };
