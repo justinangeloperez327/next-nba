@@ -47,3 +47,54 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Court-side identity: midnight, slate, chalk, terracotta and peach.
+   Display uses a condensed system stack; body and numeric UI stay readable. */
+:root {
+  --court-surface: #111722;
+  --court-line: #334155;
+  --court-accent: #f07859;
+  --court-soft: #ffab8c;
+  --court-muted: #bdc8d5;
+  --court-display: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+}
+body { line-height: 1.5; }
+button, input, select { font: inherit; }
+button, a, input, select { touch-action: manipulation; }
+button:not(:disabled), select { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+.court-intro { border-bottom: 1px solid var(--court-line); overflow: hidden; }
+.court-intro-inner { max-width: 1152px; margin-inline: auto; padding: 40px 24px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: center; }
+.court-copy { position: relative; z-index: 1; }
+.court-eyebrow { margin: 0; font-size: 11px; line-height: 1.6; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--court-soft); }
+.court-copy h1 { margin: 16px 0; font-family: var(--court-display); font-size: clamp(40px, 5vw, 64px); line-height: .98; font-weight: 900; letter-spacing: -.035em; }
+.court-copy h1 span { color: var(--court-accent); }
+.court-description { max-width: 380px; margin: 0; color: var(--court-muted); font-size: 16px; line-height: 1.7; }
+.court-button { display: inline-flex; min-height: 44px; align-items: center; gap: 24px; padding: 12px 20px; margin-top: 24px; background: var(--court-accent); color: #141013; font-weight: 700; font-size: 14px; transition: background 160ms; }
+.court-button:hover { background: #ffab8c; }
+.court-button:active { background: #ffc8b5; }
+.court-art { height: 260px; position: relative; border: 1px solid var(--court-line); overflow: hidden; background: var(--court-surface); }
+.court-art::before { content: ""; position: absolute; width: 310px; height: 310px; border: 1px solid #64748b; border-radius: 50%; top: -125px; left: 50%; transform: translateX(-50%); }
+.court-key { position: absolute; width: 136px; height: 130px; border: 1px solid #64748b; border-top: 0; top: 0; left: 50%; transform: translateX(-50%); }
+.court-circle { position: absolute; width: 136px; height: 136px; border: 1px solid #64748b; border-radius: 50%; top: 62px; left: 50%; transform: translateX(-50%); }
+.court-hoop { position: absolute; width: 24px; height: 24px; border: 3px solid var(--court-accent); border-radius: 50%; top: 24px; left: 50%; transform: translateX(-50%); }
+.court-hoop::before { content: ""; position: absolute; width: 52px; height: 3px; background: var(--court-accent); top: -7px; left: -17px; }
+.court-art-label { position: absolute; bottom: 20px; left: 20px; color: var(--court-muted); font: 10px monospace; letter-spacing: .12em; }
+.court-explore { max-width: 1152px; margin: auto; padding: 40px 24px 56px; border-top: 1px solid var(--court-line); display: grid; grid-template-columns: 1fr 2fr; gap: 40px; }
+.court-explore h2 { margin: 8px 0; color: white; font-size: 28px; font-weight: 800; letter-spacing: -.035em; }
+.court-explore-heading > p:last-child { color: var(--court-muted); font-size: 14px; line-height: 1.7; }
+.court-explore-links { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.court-destination { display: flex; gap: 16px; justify-content: space-between; border-top: 2px solid var(--court-line); padding-block: 20px; transition: border-color 160ms; }
+.court-destination:hover { border-color: var(--court-accent); }
+.court-destination h3 { margin: 8px 0; color: white; font-size: 20px; font-weight: 700; letter-spacing: -.025em; }
+.court-destination p { color: var(--court-muted); font-size: 14px; line-height: 1.7; }
+.court-link-arrow { color: var(--court-soft); font-size: 24px; }
+@media (max-width: 767px) {
+  .court-intro-inner { padding: 32px 16px; grid-template-columns: 1fr; }
+  .court-art { display: none; }
+  .court-copy h1 br { display: none; }
+  .court-explore { padding: 32px 16px; grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 479px) {
+  .court-explore-links { grid-template-columns: 1fr; gap: 8px; }
+}
