@@ -19,12 +19,12 @@ export function SiteHeader() {
           aria-current={pathname === "/" ? "page" : undefined}
           className="inline-flex w-fit items-center gap-3 text-lg font-black uppercase tracking-tight text-white"
         >
-          <span aria-hidden="true" className="grid size-9 place-items-center bg-[#e65d40] text-sm text-[#0a0d13]">N</span>
+          <span aria-hidden="true" className="grid size-11 place-items-center bg-[#e65d40] text-sm text-[#0a0d13]">N</span>
           <span>Next <span className="text-[#f07859]">NBA</span></span>
         </Link>
         <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-2 text-sm font-semibold">
           {navigation.map(({ href, label }) => {
-            const selected = pathname === href;
+            const selected = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
